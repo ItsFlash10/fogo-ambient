@@ -89,9 +89,9 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <FogoSessionProvider endpoint="https://testnet.fogo.io" domain="https://perps.ambient.finance">
-        <SafeAreaView style={{ flex: 1 }}>
-          <ScrollView contentContainerStyle={{ padding: 16 }}>
-            <Text style={{ color: 'white', fontSize: 18, fontWeight: '600' }}>Fogo Sessions Demo</Text>
+        <SafeAreaView style={[styles.safeArea, Platform.OS === 'android' ? styles.safeAreaAndroid : null]}>
+          <ScrollView contentContainerStyle={styles.scrollContent}>
+            <Text style={styles.title}>Fogo Sessions Demo</Text>
             <WalletConnector />
             <WalletConnectionDetails />
             <OrderDebugPanel />
@@ -101,6 +101,13 @@ export default function App() {
     </QueryClientProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  safeArea: { flex: 1 },
+  safeAreaAndroid: { paddingTop: StatusBar.currentHeight },
+  scrollContent: { padding: 16, paddingBottom: 32 },
+  title: { color: 'white', fontSize: 18, fontWeight: '600', marginBottom: 12 },
+});
 ```
 
 ### Hardcoded order + debug (OrderDebugPanel)
