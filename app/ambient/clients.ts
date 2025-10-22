@@ -346,3 +346,86 @@ export function setAmbientKeypair(kp: Keypair) {
 
 // Export utility functions for external use
 export { loadKeypairFromDevkey, signPayloadWithKeypair };
+
+// Expose URL for debugging/curl generation
+export const EXCHANGE_API_URL = EXCHANGE_URL;
+
+// Helper that performs the same order flow but also returns the exact request body and raw response
+export async function orderWithDebug(request: {
+  grouping: "na";
+  orders: {
+    a: number;
+    b: boolean;
+    p: string;
+    r: boolean;
+    s: string;
+    t: {
+      limit?: { tif: "Gtc" | "Ioc" | "FrontendMarket" };
+      trigger?: { isMarket: boolean; triggerPx: string; tpsl: "tp" | "sl" };
+    };
+    c?: number | string;
+  }[];
+}): Promise<{
+  url: string;
+  requestBody: Record<string, unknown>;
+  mapped: Awaited<ReturnType<typeof exchClient.order>>;
+  rawResponse?: unknown;
+  error?: string;
+}> {
+  try {
+    const [first] = request.orders;
+    const cloid = first.c ? String(first.c) : String(Date.now());
+    const isLimit = Boolean(first.t?.limit);
+
+    const action = {
+      type: "order",
+      a: first.a,
+      b: first.b,
+      p: String(first.p),
+      s: String(first.s),
+      r: first.r,
+      c: cloid,
+      t: isLimit
+        ? { limit: { tif: mapTifForAmbient(first.t.limit!.tif) } }
+        : {
+            trigger: {
+              isMarket: first.t.trigger!.isMarket,
+              triggerPx: String(first.t.trigger!.triggerPx),
+              tpsl: first.t.trigger!.tpsl,
+            },
+          },
+    };
+
+    let signed: SignedHyperliquidExchangeRequest | null = null;
+    if (ambientKeypair) {
+      signed = signPayloadWithKeypair(action, ambientKeypair);
+    } else {
+      const keypair = loadKeypairFromDevkey();
+      signed = signPayloadWithKeypair(action, keypair);
+    }
+
+    const body: Record<string, unknown> = {
+      action,
+      nonce: signed!.nonce,
+      signature: signed!.signature,
+      pubkey: signed!.pubkey,
+    };
+
+    const { data } = await axios.post(EXCHANGE_URL, body, {
+      headers: { "Content-Type": "application/json" },
+    });
+
+    let mapped = await exchClient.order(request);
+    return { url: EXCHANGE_URL, requestBody: body, mapped, rawResponse: data };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return {
+      url: EXCHANGE_URL,
+      requestBody: {},
+      mapped: {
+        response: { type: "order", data: { statuses: [{ error: message }] } },
+      },
+      error: message,
+    } as any;
+  }
+}
