@@ -1,5 +1,11 @@
 ## Fogo Ambient Expo App
 
+### Demo
+
+<video src="./session-demo.mp4" controls width="360" style="max-width:100%; height:auto;"></video>
+
+If the embed doesn’t play in your viewer, open the file directly: `./session-demo.mp4`.
+
 ### Features
 - Wallet connect (Phantom on iOS, Solana Mobile Wallet Adapter on Android)
 - Fogo session establishment and session key injection
