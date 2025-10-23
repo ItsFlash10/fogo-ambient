@@ -2,7 +2,7 @@
 
 ### Demo
 
-<video src="./session-demo.mp4" controls width="360" style="max-width:100%; height:auto;"></video>
+<video src="https://github.com/user-attachments/assets/9f223017-ae0a-4bfb-8754-f0ed6f9f845d" controls width="360" style="max-width:100%; height:auto;"></video>
 
 If the embed doesn’t play in your viewer, open the file directly: `./session-demo.mp4`.
 
