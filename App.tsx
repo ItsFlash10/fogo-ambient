@@ -28,24 +28,13 @@ export default function App() {
         domain="https://perps.ambient.finance"
       >
         <SafeAreaView
-          style={{
-            flex: 1,
-            paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
-          }}
+          style={[
+            styles.safeArea,
+            Platform.OS === "android" ? styles.safeAreaAndroid : null,
+          ]}
         >
-          <ScrollView
-            contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
-          >
-            <Text
-              style={{
-                color: "white",
-                fontSize: 18,
-                fontWeight: "600",
-                marginBottom: 12,
-              }}
-            >
-              Fogo Sessions Demo
-            </Text>
+          <ScrollView contentContainerStyle={styles.scrollContent}>
+            <Text style={styles.title}>Fogo Sessions Demo</Text>
             <WalletConnector />
             <WalletConnectionDetails />
             <OrderDebugPanel />
@@ -136,102 +125,148 @@ function OrderDebugPanel() {
   if (!isConnected) return null;
 
   return (
-    <View style={{ marginTop: 16 }}>
-      <Text style={{ color: "white", fontWeight: "600", marginBottom: 8 }}>
-        Debug Order
-      </Text>
-      <View style={{ flexDirection: "row", gap: 8, alignItems: "center" }}>
-        <Text style={{ color: "#bbb", flex: 1 }}>
+    <View style={styles.section}>
+      <Text style={styles.sectionTitle}>Debug Order</Text>
+      <View style={styles.row}>
+        <Text style={styles.mutedLine}>
           Ioc order on asset 0 with size 0.00021 @ 131425
         </Text>
       </View>
-      <View style={{ marginTop: 8, flexDirection: "row", gap: 10 }}>
+      <View style={styles.actionsRow}>
         <Text
           onPress={placeOrder}
-          style={{
-            color: isPlacing ? "#999" : "black",
-            backgroundColor: isPlacing ? "#444" : "#00e676",
-            paddingVertical: 10,
-            paddingHorizontal: 12,
-            borderRadius: 6,
-            overflow: "hidden",
-            textAlign: "center",
-          }}
+          style={[
+            styles.button,
+            isPlacing ? styles.buttonDisabled : styles.buttonPrimary,
+            isPlacing ? styles.buttonTextDisabled : styles.buttonTextPrimary,
+          ]}
         >
           {isPlacing ? "Placing..." : "Place Order"}
         </Text>
         <Text
           onPress={clearDebug}
-          style={{
-            color: "black",
-            backgroundColor: "#ffd54f",
-            paddingVertical: 10,
-            paddingHorizontal: 12,
-            borderRadius: 6,
-            overflow: "hidden",
-            textAlign: "center",
-          }}
+          style={[styles.button, styles.clearButton, styles.clearButtonText]}
         >
           Clear API data
         </Text>
       </View>
 
       {requestBody ? (
-        <View
-          style={{
-            marginTop: 12,
-            backgroundColor: "#111",
-            padding: 10,
-            borderRadius: 6,
-          }}
-        >
-          <Text style={{ color: "#ccc", marginBottom: 6 }}>cURL</Text>
-          <Text selectable style={{ color: "#ddd", fontFamily: "Courier" }}>
+        <View style={styles.codeContainer}>
+          <Text style={styles.codeTitle}>cURL</Text>
+          <Text selectable style={styles.codeText}>
             {curlString}
           </Text>
-          <Text
-            onPress={() => copy(curlString)}
-            style={{ color: "#00e676", marginTop: 6 }}
-          >
+          <Text onPress={() => copy(curlString)} style={styles.copyLink}>
             Copy cURL
           </Text>
         </View>
       ) : null}
 
       {rawResponse ? (
-        <View
-          style={{
-            marginTop: 12,
-            backgroundColor: "#111",
-            padding: 10,
-            borderRadius: 6,
-          }}
-        >
-          <Text style={{ color: "#ccc", marginBottom: 6 }}>Response</Text>
-          <Text selectable style={{ color: "#ddd", fontFamily: "Courier" }}>
+        <View style={styles.codeContainer}>
+          <Text style={styles.codeTitle}>Response</Text>
+          <Text selectable style={styles.codeText}>
             {JSON.stringify(rawResponse, null, 2)}
           </Text>
           <Text
             onPress={() => copy(JSON.stringify(rawResponse, null, 2))}
-            style={{ color: "#00e676", marginTop: 6 }}
+            style={styles.copyLink}
           >
             Copy Response
           </Text>
         </View>
       ) : null}
 
-      {error ? (
-        <Text style={{ color: "#ff5252", marginTop: 8 }}>Error: {error}</Text>
-      ) : null}
+      {error ? <Text style={styles.errorText}>Error: {error}</Text> : null}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
-    backgroundColor: "#fff",
+  },
+  safeAreaAndroid: {
+    paddingTop: StatusBar.currentHeight,
+  },
+  scrollContent: {
+    padding: 16,
+    paddingBottom: 32,
+  },
+  title: {
+    color: "white",
+    fontSize: 18,
+    fontWeight: "600",
+    marginBottom: 12,
+  },
+  section: {
+    marginTop: 16,
+  },
+  sectionTitle: {
+    color: "white",
+    fontWeight: "600",
+    marginBottom: 8,
+  },
+  row: {
+    flexDirection: "row",
+    gap: 8,
     alignItems: "center",
-    justifyContent: "center",
+  },
+  actionsRow: {
+    marginTop: 8,
+    flexDirection: "row",
+    gap: 10,
+  },
+  mutedLine: {
+    color: "#bbb",
+    flex: 1,
+  },
+  button: {
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    overflow: "hidden",
+    textAlign: "center",
+  },
+  buttonPrimary: {
+    backgroundColor: "#00e676",
+  },
+  buttonDisabled: {
+    backgroundColor: "#444",
+  },
+  buttonTextPrimary: {
+    color: "black",
+  },
+  buttonTextDisabled: {
+    color: "#999",
+  },
+  clearButton: {
+    backgroundColor: "#ffd54f",
+  },
+  clearButtonText: {
+    color: "black",
+  },
+  codeContainer: {
+    marginTop: 12,
+    backgroundColor: "#111",
+    padding: 10,
+    borderRadius: 6,
+  },
+  codeTitle: {
+    color: "#ccc",
+    marginBottom: 6,
+  },
+  codeText: {
+    color: "#ddd",
+    fontFamily: "Courier",
+  },
+  copyLink: {
+    color: "#00e676",
+    marginTop: 6,
+  },
+  errorText: {
+    color: "#ff5252",
+    marginTop: 8,
   },
 });
